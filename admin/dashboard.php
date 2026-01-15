@@ -1,0 +1,306 @@
+<?php
+session_start();
+require_once '../config.php';
+
+if (!isset($_SESSION['admin_logged_in'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Fetch all products
+$stmt = $pdo->query("SELECT * FROM products ORDER BY created_at DESC");
+$products = $stmt->fetchAll();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Ziggy Natural</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e67e22;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --danger: #e74c3c;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f7;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar a {
+            color: #bdc3c7;
+            text-decoration: none;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background-color: var(--dark);
+            color: white;
+        }
+        .sidebar .logout {
+            margin-top: auto;
+            color: var(--danger);
+        }
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            background-color: var(--secondary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn-danger {
+            background-color: var(--danger);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+        .btn-edit {
+            background-color: #3498db;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .product-img {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+            background-color: #eee;
+        }
+        .product-info {
+            padding: 1rem;
+        }
+        .product-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+            color: var(--dark);
+        }
+        .product-price {
+            font-weight: bold;
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+        .product-actions {
+            padding: 1rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Ziggy Admin</h2>
+        <a href="#" class="active">Products</a>
+        <a href="../index.php" target="_blank">View Site</a>
+        <a href="actions.php?action=logout" class="logout">Logout</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Product Management</h1>
+            <button class="btn" onclick="openModal()">+ Add New Product</button>
+        </div>
+
+        <?php if (isset($_GET['msg'])): ?>
+            <div style="background: #d4edda; color: #155724; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+                <?php echo htmlspecialchars($_GET['msg']); ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="product-grid">
+            <?php foreach ($products as $product): ?>
+                <div class="product-card">
+                    <?php if ($product['image']): ?>
+                        <img src="../<?php echo htmlspecialchars($product['image']); ?>" alt="Product" class="product-img">
+                    <?php else: ?>
+                        <div class="product-img" style="display:flex;align-items:center;justify-content:center;color:#999;">No Image</div>
+                    <?php endif; ?>
+                    <div class="product-info">
+                        <h3 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h3>
+                        <div class="product-price">$<?php echo number_format($product['price'], 2); ?></div>
+                        <p style="color:#666; font-size: 0.9rem; margin-top: 0.5rem;"><?php echo htmlspecialchars(substr($product['description'], 0, 50)) . '...'; ?></p>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn btn-edit" onclick="editProduct(<?php echo htmlspecialchars(json_encode($product)); ?>)">Edit</button>
+                        <a href="actions.php?action=delete_product&id=<?php echo $product['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Add Product</h2>
+            <form action="actions.php" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="action" id="formAction" value="add_product">
+                <input type="hidden" name="id" id="productId">
+                
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" name="name" id="pName" required>
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" step="0.01" name="price" id="pPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" id="pDesc" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image</label>
+                    <input type="file" name="image" accept="image/*">
+                    <small style="color:#666; display:block; margin-top:5px;">Leave empty to keep current image when editing</small>
+                </div>
+
+                <div style="text-align: right; margin-top: 1.5rem;">
+                    <button type="submit" class="btn" style="width: 100%;">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('productModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const formAction = document.getElementById('formAction');
+        const productId = document.getElementById('productId');
+        const pName = document.getElementById('pName');
+        const pPrice = document.getElementById('pPrice');
+        const pDesc = document.getElementById('pDesc');
+
+        function openModal() {
+            modal.style.display = 'flex';
+            modalTitle.textContent = 'Add Product';
+            formAction.value = 'add_product';
+            productId.value = '';
+            pName.value = '';
+            pPrice.value = '';
+            pDesc.value = '';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function editProduct(product) {
+            modal.style.display = 'flex';
+            modalTitle.textContent = 'Edit Product';
+            formAction.value = 'update_product';
+            productId.value = product.id;
+            pName.value = product.name;
+            pPrice.value = product.price;
+            pDesc.value = product.description;
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
