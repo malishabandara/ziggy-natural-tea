@@ -7,9 +7,19 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
-// Fetch all products
-$stmt = $pdo->query("SELECT * FROM products ORDER BY created_at DESC");
-$products = $stmt->fetchAll();
+// Fetch all products grouped by category
+$stmt = $pdo->query("SELECT * FROM products ORDER BY category, created_at DESC");
+$allProducts = $stmt->fetchAll();
+
+// Group products by category
+$productsByCategory = [];
+foreach ($allProducts as $product) {
+    $category = $product['category'] ?? 'Uncategorized';
+    if (!isset($productsByCategory[$category])) {
+        $productsByCategory[$category] = [];
+    }
+    $productsByCategory[$category][] = $product;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -191,6 +201,7 @@ $products = $stmt->fetchAll();
     <div class="sidebar">
         <h2>Ziggy Admin</h2>
         <a href="#" class="active">Products</a>
+        <a href="messages.php">Messages</a>
         <a href="../index.php" target="_blank">View Site</a>
         <a href="actions.php?action=logout" class="logout">Logout</a>
     </div>
@@ -207,7 +218,11 @@ $products = $stmt->fetchAll();
             </div>
         <?php endif; ?>
 
-        <div class="product-grid">
+        <?php foreach ($productsByCategory as $categoryName => $products): ?>
+            <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--dark); border-bottom: 2px solid var(--secondary); padding-bottom: 0.5rem;">
+                <?php echo htmlspecialchars($categoryName); ?> (<?php echo count($products); ?>)
+            </h2>
+            <div class="product-grid">
             <?php foreach ($products as $product): ?>
                 <div class="product-card">
                     <?php if ($product['image']): ?>
@@ -217,8 +232,14 @@ $products = $stmt->fetchAll();
                     <?php endif; ?>
                     <div class="product-info">
                         <h3 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h3>
-                        <div class="product-price">$<?php echo number_format($product['price'], 2); ?></div>
+                        <div class="product-price">LKR <?php echo number_format($product['price'], 2); ?></div>
                         <p style="color:#666; font-size: 0.9rem; margin-top: 0.5rem;"><?php echo htmlspecialchars(substr($product['description'], 0, 50)) . '...'; ?></p>
+                        <div style="margin-top: 0.5rem; font-size: 0.85rem;">
+                            <strong>Stock:</strong> 
+                            <span style="color: <?php echo ($product['stock'] ?? 0) > 10 ? '#27ae60' : (($product['stock'] ?? 0) > 0 ? '#f39c12' : '#e74c3c'); ?>;">
+                                <?php echo $product['stock'] ?? 0; ?> units
+                            </span>
+                        </div>
                     </div>
                     <div class="product-actions">
                         <button class="btn btn-edit" onclick="editProduct(<?php echo htmlspecialchars(json_encode($product)); ?>)">Edit</button>
@@ -226,7 +247,8 @@ $products = $stmt->fetchAll();
                     </div>
                 </div>
             <?php endforeach; ?>
-        </div>
+            </div>
+        <?php endforeach; ?>
     </div>
 
     <!-- Add/Edit Modal -->
@@ -239,12 +261,24 @@ $products = $stmt->fetchAll();
                 <input type="hidden" name="id" id="productId">
                 
                 <div class="form-group">
+                    <label>Category</label>
+                    <select name="category" id="pCategory" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="Ceylon Tea Collection">Ceylon Tea Collection</option>
+                        <option value="Ceylon Coffee Collection">Ceylon Coffee Collection</option>
+                        <option value="Gift Collection">Gift Collection</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Product Name</label>
                     <input type="text" name="name" id="pName" required>
                 </div>
                 <div class="form-group">
                     <label>Price</label>
                     <input type="number" step="0.01" name="price" id="pPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>Stock Quantity</label>
+                    <input type="number" name="stock" id="pStock" value="0" min="0" required>
                 </div>
                 <div class="form-group">
                     <label>Description</label>
@@ -268,8 +302,10 @@ $products = $stmt->fetchAll();
         const modalTitle = document.getElementById('modalTitle');
         const formAction = document.getElementById('formAction');
         const productId = document.getElementById('productId');
+        const pCategory = document.getElementById('pCategory');
         const pName = document.getElementById('pName');
         const pPrice = document.getElementById('pPrice');
+        const pStock = document.getElementById('pStock');
         const pDesc = document.getElementById('pDesc');
 
         function openModal() {
@@ -277,8 +313,10 @@ $products = $stmt->fetchAll();
             modalTitle.textContent = 'Add Product';
             formAction.value = 'add_product';
             productId.value = '';
+            pCategory.value = 'Ceylon Tea Collection'; // Default
             pName.value = '';
             pPrice.value = '';
+            pStock.value = '0';
             pDesc.value = '';
         }
 
@@ -291,8 +329,10 @@ $products = $stmt->fetchAll();
             modalTitle.textContent = 'Edit Product';
             formAction.value = 'update_product';
             productId.value = product.id;
+            pCategory.value = product.category || 'Ceylon Tea Collection';
             pName.value = product.name;
             pPrice.value = product.price;
+            pStock.value = product.stock || 0;
             pDesc.value = product.description;
         }
 

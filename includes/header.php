@@ -7,13 +7,17 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ziggy Natural - Premium Tea & Coffee</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time() . rand(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
     <header>
-        <a href="index.php" class="logo">Ziggy <span>Natural</span></a>
+        <a href="index.php" class="logo">
+            <img src="assets/logo.png" alt="Ziggy Natural" style="height: 50px; margin-right: 10px;">
+            <div class="logo-text">Ziggy <span>Natural</span></div>
+        </a>
         <nav>
             <a href="index.php" class="<?php echo $current_page == 'index.php' ? 'active' : ''; ?>">Home</a>
             <a href="products.php" class="<?php echo $current_page == 'products.php' ? 'active' : ''; ?>">Shop</a>
