@@ -1,12 +1,13 @@
 <?php
 session_start();
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-    header("Location: dashboard.php");
+    header("Location: dashboard");
     exit;
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,27 +22,32 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
             height: 100vh;
             margin: 0;
         }
+
         .login-container {
             background: white;
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 400px;
         }
+
         h2 {
             text-align: center;
             color: #333;
             margin-bottom: 1.5rem;
         }
+
         .form-group {
             margin-bottom: 1rem;
         }
+
         label {
             display: block;
             margin-bottom: 0.5rem;
             color: #666;
         }
+
         input {
             width: 100%;
             padding: 0.75rem;
@@ -49,6 +55,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
             border-radius: 4px;
             box-sizing: border-box;
         }
+
         button {
             width: 100%;
             padding: 0.75rem;
@@ -60,9 +67,11 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
             font-size: 1rem;
             transition: background 0.3s;
         }
+
         button:hover {
             background-color: #34495e;
         }
+
         .error {
             color: red;
             text-align: center;
@@ -70,6 +79,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
         }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <h2>Ziggy Admin</h2>
@@ -90,4 +100,5 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
         </form>
     </div>
 </body>
+
 </html>

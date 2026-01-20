@@ -13,7 +13,7 @@ require_once 'config.php';
                 <span class="hero-subtitle">Premium Ceylon Collection</span>
                 <h1>Sip the Essence of <br>Nature's Purest</h1>
                 <p>Experience the finest hand-picked organic tea and artisan coffee blends.</p>
-                <a href="products.php" class="btn btn-gold">Explore Collection</a>
+                <a href="products" class="btn btn-gold">Explore Collection</a>
             </div>
         </div>
         <!-- Slide 2 -->
@@ -23,7 +23,7 @@ require_once 'config.php';
                 <span class="hero-subtitle">Artisan Roasted Coffee</span>
                 <h1>Awaken Your <br>Senses Today</h1>
                 <p>Rich, aromatic, and bold coffee blends for the perfect morning ritual.</p>
-                <a href="products.php" class="btn btn-gold">Shop Coffee</a>
+                <a href="products" class="btn btn-gold">Shop Coffee</a>
             </div>
         </div>
         <!-- Slide 3 -->
@@ -33,7 +33,7 @@ require_once 'config.php';
                 <span class="hero-subtitle">Wellness & Harmony</span>
                 <h1>Discover the Art <br>of Fine Living</h1>
                 <p>Curated gift sets and herbal blends to soothe your soul.</p>
-                <a href="products.php" class="btn btn-gold">View Gifts</a>
+                <a href="products" class="btn btn-gold">View Gifts</a>
             </div>
         </div>
     </div>
@@ -42,24 +42,25 @@ require_once 'config.php';
 <!-- Collections Highlight -->
 <section class="collections-section">
     <div class="section-header text-center">
-        <img src="assets/img/leaf-icon.svg" alt="" class="leaf-icon" style="width: 30px; margin-bottom: 10px;"> <!-- Placeholder icon -->
+        <img src="assets/img/leaf-icon.svg" alt="" class="leaf-icon" style="width: 30px; margin-bottom: 10px;">
+        <!-- Placeholder icon -->
         <h2 class="serif">Our Collections</h2>
         <p class="section-desc">Handpicked from the lush hills of Sri Lanka</p>
     </div>
-    
+
     <div class="collections-grid container">
         <!-- Card 1 -->
         <div class="collection-card">
             <div class="collection-img">
                 <img src="assets/4.png" alt="Tea Collection">
                 <div class="card-overlay">
-                    <a href="products.php" class="btn-arrow">➔</a>
+                    <a href="products" class="btn-arrow">➔</a>
                 </div>
             </div>
             <div class="collection-info">
                 <h3>Premium Tea</h3>
                 <p>Pure Ceylon Black, Green & Herbal Teas</p>
-                <a href="products.php" class="link-gold">Shop Now</a>
+                <a href="products" class="link-gold">Shop Now</a>
             </div>
         </div>
 
@@ -68,13 +69,13 @@ require_once 'config.php';
             <div class="collection-img">
                 <img src="assets/6.png" alt="Coffee Collection">
                 <div class="card-overlay">
-                    <a href="products.php" class="btn-arrow">➔</a>
+                    <a href="products" class="btn-arrow">➔</a>
                 </div>
             </div>
             <div class="collection-info">
                 <h3>Artisan Coffee</h3>
                 <p>Rich Arabica & Robusta Blends</p>
-                <a href="products.php" class="link-gold">Shop Now</a>
+                <a href="products" class="link-gold">Shop Now</a>
             </div>
         </div>
 
@@ -83,13 +84,13 @@ require_once 'config.php';
             <div class="collection-img">
                 <img src="assets/5.png" alt="Spices & Gifts">
                 <div class="card-overlay">
-                    <a href="products.php" class="btn-arrow">➔</a>
+                    <a href="products" class="btn-arrow">➔</a>
                 </div>
             </div>
             <div class="collection-info">
                 <h3>Gifts & Spices</h3>
                 <p>Curated Sets & Authentic Spices</p>
-                <a href="products.php" class="link-gold">Shop Now</a>
+                <a href="products" class="link-gold">Shop Now</a>
             </div>
         </div>
     </div>
@@ -159,14 +160,14 @@ require_once 'config.php';
         <div class="story-content text-center">
             <h2 class="serif">The Heart Behind the Brew</h2>
             <p class="story-text">
-                Ziggy Natural was born from a passion for the pristine hills of Ceylon. 
-                Our team represents generations of tea and coffee artisans dedicated to bringing 
+                Ziggy Natural was born from a passion for the pristine hills of Ceylon.
+                Our team represents generations of tea and coffee artisans dedicated to bringing
                 you the authentic taste of nature.
             </p>
             <div class="team-img-wrapper">
                 <img src="assets/7.png" alt="Our Team" class="team-img">
             </div>
-            <a href="about.php" class="btn btn-dark mt-4">Read Our Story</a>
+            <a href="about" class="btn btn-dark mt-4">Read Our Story</a>
         </div>
     </div>
 </section>
@@ -177,7 +178,7 @@ require_once 'config.php';
     <div class="container relative z-10 text-center text-white">
         <h2 class="serif mb-2">Elevate Your Daily Ritual</h2>
         <p class="mb-4">Join our community of tea and coffee lovers today.</p>
-        <a href="products.php" class="btn btn-gold">Shop Collection</a>
+        <a href="products" class="btn btn-gold">Shop Collection</a>
     </div>
 </section>
 

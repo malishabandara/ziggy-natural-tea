@@ -426,6 +426,32 @@ nav a.active::after {
         text-align: center;
         align-items: center;
     }
+
+    /* Social Links - Mobile Optimization */
+    .social-links-centered {
+        gap: 1rem;
+        /* Reduced gap for mobile */
+        flex-wrap: wrap;
+        /* Allow wrapping if needed */
+        padding: 0 1rem;
+        /* Add padding to prevent edge overflow */
+    }
+
+    .social-item {
+        gap: 0.5rem;
+        /* Reduce gap between icon and text */
+    }
+
+    .social-item span {
+        font-size: 0.7rem;
+        /* Smaller text on mobile */
+    }
+
+    .social-item svg {
+        width: 20px;
+        /* Smaller icons on mobile */
+        height: 20px;
+    }
 }
 
 /* Animations */
@@ -1278,6 +1304,13 @@ nav a.active::after {
 }
 
 @media (max-width: 768px) {
+
+    .page-hero,
+    .cta-section {
+        background-attachment: scroll !important;
+        background-position: center top !important;
+    }
+
     .page-hero {
         height: 250px;
     }
@@ -1716,6 +1749,14 @@ nav a.active::after {
         font-size: 1.3rem !important;
     }
 
+    .collection-img {
+        height: 250px;
+    }
+
+    .collection-img img {
+        object-fit: contain;
+    }
+
     /* Container Padding */
     .container {
         padding: 0 1rem;
@@ -1724,6 +1765,11 @@ nav a.active::after {
     /* Section Padding */
     section {
         padding: 3rem 1rem !important;
+    }
+
+    /* Remove left/right padding from hero slider on mobile */
+    .hero-slider-section {
+        padding: 3rem 0 !important;
     }
 
     .about-intro,
