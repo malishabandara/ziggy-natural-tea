@@ -28,7 +28,7 @@ $products = $stmt->fetchAll();
                     <?php 
                         $category = $product['category'] ?? 'Ceylon Tea Collection'; 
                     ?>
-                    <div class="product-card" data-category="<?php echo htmlspecialchars($category); ?>">
+                    <div class="product-card" data-category="<?php echo htmlspecialchars($category); ?>" data-id="<?php echo $product['id']; ?>">
                         <div class="product-img-wrapper">
                             <?php 
                                 $stock = $product['stock'];
@@ -53,7 +53,7 @@ $products = $stmt->fetchAll();
                             <h3 class="product-name"><?php echo htmlspecialchars($product['name']); ?></h3>
                             <p class="product-desc"><?php echo htmlspecialchars($product['description']); ?></p>
                             <div class="product-price">LKR <?php echo number_format($product['price'], 2); ?></div>
-                            <button class="btn" style="margin-top: 1rem; width: 100%; font-size: 0.9rem;">Add to Cart</button>
+                            <button class="btn" style="margin-top: 1rem; width: 100%; font-size: 0.9rem;">Order</button>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -89,7 +89,7 @@ $products = $stmt->fetchAll();
                     <span id="modalTotal">LKR 0.00</span>
                 </div>
                 
-                <button id="confirmOrderBtn" class="confirm-btn">Confirm Order via WhatsApp</button>
+                <button id="addToCartBtn" class="confirm-btn">Add to Cart</button>
             </div>
         </div>
     </div>
@@ -125,11 +125,25 @@ $products = $stmt->fetchAll();
             const qtyInput = document.getElementById('qtyInput');
             const increaseQty = document.getElementById('increaseQty');
             const decreaseQty = document.getElementById('decreaseQty');
-            const confirmBtn = document.getElementById('confirmOrderBtn');
-
+            // Add to Cart Logic
+            const confirmBtn = document.getElementById('addToCartBtn');
             let currentPrice = 0;
 
-            // Open Modal
+            confirmBtn.addEventListener('click', () => {
+                const qty = parseInt(qtyInput.value);
+                const product = {
+                    id: modalTitle.getAttribute('data-id'), // ensure we pass ID
+                    name: modalTitle.innerText,
+                    price: currentPrice,
+                    image: modalImg.src,
+                    quantity: qty
+                };
+
+                Cart.addItem(product);
+                modal.style.display = 'none';
+            });
+
+            // Open Modal - Update to set ID
             document.querySelectorAll('.btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     if(e.target.closest('.product-card')) {
@@ -137,11 +151,14 @@ $products = $stmt->fetchAll();
                         const img = card.querySelector('.product-img').src;
                         const title = card.querySelector('.product-name').innerText;
                         const priceText = card.querySelector('.product-price').innerText.replace('LKR', '').trim().replace(',', '');
+                        // Assuming we can get ID from somewhere. Let's add data-id to product card in PHP loop first.
+                        const id = card.getAttribute('data-id'); 
                         
                         currentPrice = parseFloat(priceText);
                         
                         modalImg.src = img;
                         modalTitle.innerText = title;
+                        modalTitle.setAttribute('data-id', id); // Store ID in modal
                         modalPrice.innerText = 'LKR ' + currentPrice.toFixed(2);
                         
                         qtyInput.value = 1;
@@ -151,6 +168,7 @@ $products = $stmt->fetchAll();
                     }
                 });
             });
+
 
             // Close Modal
             closeBtn.addEventListener('click', () => {
@@ -180,19 +198,6 @@ $products = $stmt->fetchAll();
                 const total = currentPrice * parseInt(qtyInput.value);
                 modalTotal.innerText = 'LKR ' + total.toFixed(2);
             }
-
-            // Confirm Order (WhatsApp)
-            confirmBtn.addEventListener('click', () => {
-                const qty = qtyInput.value;
-                const total = modalTotal.innerText;
-                const product = modalTitle.innerText;
-                
-                const message = `Hello, I would like to order ${product}. Quantity: ${qty}. Total Price: ${total}.`;
-                const whatsappUrl = `https://wa.me/94774995669?text=${encodeURIComponent(message)}`;
-                
-                window.open(whatsappUrl, '_blank');
-                modal.style.display = 'none';
-            });
         });
     </script>
 <?php include 'includes/footer.php'; ?>

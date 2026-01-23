@@ -1,41 +1,66 @@
 <?php
 require_once 'config.php';
+
+// Fetch hero slides
+$stmt = $pdo->query("SELECT * FROM hero_slides ORDER BY order_index ASC");
+$heroSlides = $stmt->fetchAll();
+
 ?>
 <?php include 'includes/header.php'; ?>
 
 <!-- Hero Section with Slider -->
 <section class="hero-slider-section">
     <div class="hero-slider">
-        <!-- Slide 1 -->
-        <div class="hero-slide active" style="background-image: url('assets/customers/1.JPG');">
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <span class="hero-subtitle">Premium Ceylon Collection</span>
-                <h1>Sip the Essence of <br>Nature's Purest</h1>
-                <p>Experience the finest hand-picked organic tea and artisan coffee blends.</p>
-                <a href="products" class="btn btn-gold">Explore Collection</a>
+        <?php if (!empty($heroSlides)): ?>
+            <?php foreach ($heroSlides as $index => $slide): ?>
+                <div class="hero-slide <?php echo $index === 0 ? 'active' : ''; ?>" style="background-image: url('<?php echo htmlspecialchars($slide['image_path']); ?>');">
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <?php if ($slide['subtitle']): ?>
+                            <span class="hero-subtitle"><?php echo htmlspecialchars($slide['subtitle']); ?></span>
+                        <?php endif; ?>
+                        <h1><?php echo $slide['title']; ?></h1>
+                        <?php if ($slide['description']): ?>
+                            <p><?php echo htmlspecialchars($slide['description']); ?></p>
+                        <?php endif; ?>
+                        <?php if ($slide['button_text']): ?>
+                            <a href="<?php echo htmlspecialchars($slide['button_link']); ?>" class="btn btn-gold"><?php echo htmlspecialchars($slide['button_text']); ?></a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <!-- Slide 1 -->
+            <div class="hero-slide active" style="background-image: url('assets/customers/1.JPG');">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <span class="hero-subtitle">Premium Ceylon Collection</span>
+                    <h1>Sip the Essence of <br>Nature's Purest</h1>
+                    <p>Experience the finest hand-picked organic tea and artisan coffee blends.</p>
+                    <a href="products" class="btn btn-gold">Explore Collection</a>
+                </div>
             </div>
-        </div>
-        <!-- Slide 2 -->
-        <div class="hero-slide" style="background-image: url('assets/1.PNG');">
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <span class="hero-subtitle">Artisan Roasted Coffee</span>
-                <h1>Awaken Your <br>Senses Today</h1>
-                <p>Rich, aromatic, and bold coffee blends for the perfect morning ritual.</p>
-                <a href="products" class="btn btn-gold">Shop Coffee</a>
+            <!-- Slide 2 -->
+            <div class="hero-slide" style="background-image: url('assets/1.PNG');">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <span class="hero-subtitle">Artisan Roasted Coffee</span>
+                    <h1>Awaken Your <br>Senses Today</h1>
+                    <p>Rich, aromatic, and bold coffee blends for the perfect morning ritual.</p>
+                    <a href="products" class="btn btn-gold">Shop Coffee</a>
+                </div>
             </div>
-        </div>
-        <!-- Slide 3 -->
-        <div class="hero-slide" style="background-image: url('assets/3.JPG');">
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <span class="hero-subtitle">Wellness & Harmony</span>
-                <h1>Discover the Art <br>of Fine Living</h1>
-                <p>Curated gift sets and herbal blends to soothe your soul.</p>
-                <a href="products" class="btn btn-gold">View Gifts</a>
+            <!-- Slide 3 -->
+            <div class="hero-slide" style="background-image: url('assets/3.JPG');">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <span class="hero-subtitle">Wellness & Harmony</span>
+                    <h1>Discover the Art <br>of Fine Living</h1>
+                    <p>Curated gift sets and herbal blends to soothe your soul.</p>
+                    <a href="products" class="btn btn-gold">View Gifts</a>
+                </div>
             </div>
-        </div>
+        <?php endif; ?>
     </div>
 </section>
 

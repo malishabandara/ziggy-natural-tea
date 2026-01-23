@@ -28,6 +28,9 @@ foreach ($allProducts as $product) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Ziggy Natural</title>
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="shortcut icon" href="../assets/logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="../assets/logo.png">
     <style>
         :root {
             --primary: #2c3e50;
@@ -308,6 +311,8 @@ foreach ($allProducts as $product) {
         </div>
         <div class="nav-links" id="navLinks">
             <a href="#" class="active">Products</a>
+            <a href="orders.php">Orders</a>
+            <a href="slider.php">Slider Settings</a>
             <a href="messages">Messages</a>
             <a href="../index" target="_blank">View Site</a>
             <a href="actions.php?action=logout" class="logout">Logout</a>
@@ -388,7 +393,7 @@ foreach ($allProducts as $product) {
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <h2 id="modalTitle">Add Product</h2>
-            <form action="actions.php" method="POST" enctype="multipart/form-data">
+            <form action="actions" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" id="formAction" value="add_product">
                 <input type="hidden" name="id" id="productId">
 

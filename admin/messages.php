@@ -18,6 +18,9 @@ $messages = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages - Ziggy Natural</title>
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="shortcut icon" href="../assets/logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="../assets/logo.png">
     <style>
         :root {
             --primary: #2c3e50;
@@ -221,6 +224,8 @@ $messages = $stmt->fetchAll();
         </div>
         <div class="nav-links" id="navLinks">
             <a href="dashboard">Products</a>
+            <a href="orders.php">Orders</a>
+            <a href="slider.php">Slider Settings</a>
             <a href="messages" class="active">Messages</a>
             <a href="../index" target="_blank">View Site</a>
             <a href="actions.php?action=logout" class="logout">Logout</a>
