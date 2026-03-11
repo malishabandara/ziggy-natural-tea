@@ -15,7 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Invalid request. Please fill all fields.");
     }
 
-    $total_amount = 0;
+    $shipping_cost = 350;
+    $total_amount = $shipping_cost;
     foreach ($cart_items as $item) {
         $total_amount += $item['price'] * $item['quantity'];
     }
@@ -46,7 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmtItems = $pdo->prepare("INSERT INTO order_items (order_id, product_id, product_name, quantity, price) VALUES (?, ?, ?, ?, ?)");
         
         foreach ($cart_items as $item) {
-            $stmtItems->execute([$order_id, $item['id'], $item['name'], $item['quantity'], $item['price']]);
+            $pid = isset($item['product_id']) ? $item['product_id'] : intval($item['id']);
+            $stmtItems->execute([$order_id, $pid, $item['name'], $item['quantity'], $item['price']]);
         }
 
         $pdo->commit();

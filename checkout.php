@@ -410,15 +410,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render Summary
     const list = document.getElementById('order-items-list');
-    let total = 0;
+    let subtotal = 0;
+    const shippingCost = 350;
+
     items.forEach(item => {
         const itemTotal = item.price * item.quantity;
-        total += itemTotal;
+        subtotal += itemTotal;
         const div = document.createElement('div');
         div.className = 'order-list-item';
         div.innerHTML = `<span>${item.name} <span style="color:#7f8c8d; font-weight:normal;">x ${item.quantity}</span></span> <span>LKR ${itemTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>`;
         list.appendChild(div);
     });
+
+    // Add Shipping Row
+    const shippingDiv = document.createElement('div');
+    shippingDiv.className = 'order-list-item';
+    shippingDiv.innerHTML = `<span><i class="fas fa-truck" style="color: #e67e22; margin-right: 5px;"></i> Shipping</span> <span>LKR ${shippingCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>`;
+    list.appendChild(shippingDiv);
+
+    const total = subtotal + shippingCost;
     document.getElementById('checkout-total').innerText = 'LKR ' + total.toLocaleString(undefined, {minimumFractionDigits: 2});
 
     // Toggle Payment & Style

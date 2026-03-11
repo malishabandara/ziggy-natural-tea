@@ -7,18 +7,34 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
+// Fetch Categories for Dropdown and Grouping
+try {
+    $catStmt = $pdo->query("SELECT * FROM categories ORDER BY sort_order ASC, name ASC");
+    $dbCategories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $dbCategories = [];
+}
+
 // Fetch all products grouped by category
-$stmt = $pdo->query("SELECT * FROM products ORDER BY category, created_at DESC");
+$stmt = $pdo->query("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY c.sort_order ASC, p.sort_order ASC, p.created_at DESC");
 $allProducts = $stmt->fetchAll();
 
 // Group products by category
 $productsByCategory = [];
+// Initialize with all existing categories to ensure they appear even if empty
+foreach ($dbCategories as $cat) {
+    $productsByCategory[$cat['name']] = [];
+}
+
 foreach ($allProducts as $product) {
-    $category = $product['category'] ?? 'Uncategorized';
-    if (!isset($productsByCategory[$category])) {
-        $productsByCategory[$category] = [];
+    // validation for null category
+    $catName = $product['category_name'] ? $product['category_name'] : ($product['category'] ?? 'Uncategorized');
+    
+    // If category name from product isn't in DB (deleted?), add it dynamically
+    if (!isset($productsByCategory[$catName])) {
+        $productsByCategory[$catName] = [];
     }
-    $productsByCategory[$category][] = $product;
+    $productsByCategory[$catName][] = $product;
 }
 ?>
 <!DOCTYPE html>
@@ -200,6 +216,8 @@ foreach ($allProducts as $product) {
             width: 100%;
             max-width: 500px;
             position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .close-btn {
@@ -311,8 +329,10 @@ foreach ($allProducts as $product) {
         </div>
         <div class="nav-links" id="navLinks">
             <a href="#" class="active">Products</a>
+            <a href="categories.php">Categories</a>
             <a href="orders.php">Orders</a>
             <a href="slider.php">Slider Settings</a>
+            <a href="collections.php">Collections</a>
             <a href="messages">Messages</a>
             <a href="../index" target="_blank">View Site</a>
             <a href="actions.php?action=logout" class="logout">Logout</a>
@@ -399,11 +419,11 @@ foreach ($allProducts as $product) {
 
                 <div class="form-group">
                     <label>Category</label>
-                    <select name="category" id="pCategory" required
+                    <select name="category_id" id="pCategory" required
                         style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
-                        <option value="Ceylon Tea Collection">Ceylon Tea Collection</option>
-                        <option value="Ceylon Coffee Collection">Ceylon Coffee Collection</option>
-                        <option value="Gift Collection">Gift Collection</option>
+                        <?php foreach ($dbCategories as $cat): ?>
+                            <option value="<?php echo $cat['id']; ?>"><?php echo htmlspecialchars($cat['name']); ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="form-group">
@@ -419,18 +439,59 @@ foreach ($allProducts as $product) {
                     <input type="number" name="stock" id="pStock" value="0" min="0" required>
                 </div>
                 <div class="form-group">
+                    <label>Display Order</label>
+                    <input type="number" name="sort_order" id="pOrder" value="0" placeholder="0 (Lower shows first)">
+                </div>
+                <div class="form-group">
                     <label>Description</label>
                     <textarea name="description" id="pDesc" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Image</label>
+                    <label>Main Image</label>
+                    <div id="previewImageContainer" style="margin-bottom: 5px; display: none; align-items: start; gap: 10px;">
+                        <img id="previewImage" src="" alt="Current Image" style="max-height: 100px; border-radius: 4px; border: 1px solid #ddd;">
+                         <button type="button" class="btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; cursor: pointer;" onclick="markImageForRemoval('image')">Remove</button>
+                    </div>
+                    <input type="hidden" name="remove_image" id="remove_image" value="0">
                     <input type="file" name="image" accept="image/*">
-                    <small style="color:#666; display:block; margin-top:5px;">Leave empty to keep current image when
-                        editing</small>
+                    <small style="color:#666; display:block; margin-top:5px;">Leave empty to keep current image when editing</small>
+                </div>
+                <div class="form-group">
+                    <label>Image 2 (Optional)</label>
+                    <div id="previewImage2Container" style="margin-bottom: 5px; display: none; align-items: start; gap: 10px;">
+                        <img id="previewImage2" src="" alt="Current Image 2" style="max-height: 100px; border-radius: 4px; border: 1px solid #ddd;">
+                        <button type="button" class="btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; cursor: pointer;" onclick="markImageForRemoval('image2')">Remove</button>
+                    </div>
+                    <input type="hidden" name="remove_image2" id="remove_image2" value="0">
+                    <input type="file" name="image2" accept="image/*">
+                    <small style="color:#666; display:block; margin-top:5px;">Leave empty to keep current image when editing</small>
+                </div>
+                <div class="form-group">
+                    <label>Image 3 (Optional)</label>
+                    <div id="previewImage3Container" style="margin-bottom: 5px; display: none; align-items: start; gap: 10px;">
+                        <img id="previewImage3" src="" alt="Current Image 3" style="max-height: 100px; border-radius: 4px; border: 1px solid #ddd;">
+                        <button type="button" class="btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; cursor: pointer;" onclick="markImageForRemoval('image3')">Remove</button>
+                    </div>
+                    <input type="hidden" name="remove_image3" id="remove_image3" value="0">
+                    <input type="file" name="image3" accept="image/*">
+                    <small style="color:#666; display:block; margin-top:5px;">Leave empty to keep current image when editing</small>
                 </div>
 
+                <!-- Variations Section -->
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #ddd;">
+                    <h3 style="margin-top: 0; font-size: 1.1rem;">Product Variations (Sizes/Weights)</h3>
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 1rem;">Add different sizes like "100g", "50g" with their specific prices.</p>
+                    
+                    <div id="variationsContainer">
+                        <!-- Dynamic Variation Rows will appear here -->
+                    </div>
+
+                    <button type="button" class="btn" style="background-color: #34495e; font-size: 0.9rem; padding: 0.4rem 0.8rem;" onclick="addVariationRow()">+ Add Variation</button>
+                    <input type="hidden" name="variations_json" id="variationsJson">
+                </div>
+                
                 <div style="text-align: right; margin-top: 1.5rem;">
-                    <button type="submit" class="btn" style="width: 100%;">Save Product</button>
+                    <button type="button" onclick="submitProductForm()" class="btn" style="width: 100%;">Save Product</button>
                 </div>
             </form>
         </div>
@@ -464,6 +525,7 @@ foreach ($allProducts as $product) {
         const pName = document.getElementById('pName');
         const pPrice = document.getElementById('pPrice');
         const pStock = document.getElementById('pStock');
+        const pOrder = document.getElementById('pOrder');
         const pDesc = document.getElementById('pDesc');
 
         function openModal() {
@@ -471,11 +533,49 @@ foreach ($allProducts as $product) {
             modalTitle.textContent = 'Add Product';
             formAction.value = 'add_product';
             productId.value = '';
-            pCategory.value = 'Ceylon Tea Collection'; // Default
+            // Default to first category if available
+            if(pCategory.options.length > 0) pCategory.selectedIndex = 0;
             pName.value = '';
             pPrice.value = '';
             pStock.value = '0';
+            pOrder.value = '0';
             pDesc.value = '';
+            
+            
+            // Allow JS to access these if they exist (need to define them first)
+            resetPreviews();
+            clearVariations();
+        }
+
+        // ... (resetPreviews, markImageForRemoval, closeModal) ...
+        function resetPreviews() {
+            document.getElementById('previewImageContainer').style.display = 'none';
+            document.getElementById('previewImage2Container').style.display = 'none';
+            document.getElementById('previewImage3Container').style.display = 'none';
+            document.getElementById('previewImage').src = '';
+            document.getElementById('previewImage2').src = '';
+            document.getElementById('previewImage3').src = '';
+            
+            // Reset remove flags
+            document.getElementById('remove_image').value = '0';
+            document.getElementById('remove_image2').value = '0';
+            document.getElementById('remove_image3').value = '0';
+        }
+
+        function markImageForRemoval(imgKey) {
+            let containerId = 'previewImageContainer';
+            let inputId = 'remove_image';
+            
+            if (imgKey === 'image2') {
+                containerId = 'previewImage2Container';
+                inputId = 'remove_image2';
+            } else if (imgKey === 'image3') {
+                containerId = 'previewImage3Container';
+                inputId = 'remove_image3';
+            }
+            
+            document.getElementById(containerId).style.display = 'none';
+            document.getElementById(inputId).value = '1';
         }
 
         function closeModal() {
@@ -487,11 +587,100 @@ foreach ($allProducts as $product) {
             modalTitle.textContent = 'Edit Product';
             formAction.value = 'update_product';
             productId.value = product.id;
-            pCategory.value = product.category || 'Ceylon Tea Collection';
+            pCategory.value = product.category_id;
             pName.value = product.name;
             pPrice.value = product.price;
             pStock.value = product.stock || 0;
+            pOrder.value = product.sort_order || 0;
             pDesc.value = product.description;
+
+            resetPreviews();
+
+            if (product.image) {
+                document.getElementById('previewImage').src = "../" + product.image;
+                document.getElementById('previewImageContainer').style.display = 'flex';
+            }
+            if (product.image2) {
+                document.getElementById('previewImage2').src = "../" + product.image2;
+                document.getElementById('previewImage2Container').style.display = 'flex';
+            }
+            if (product.image3) {
+                document.getElementById('previewImage3').src = "../" + product.image3;
+                document.getElementById('previewImage3Container').style.display = 'flex';
+            }
+
+            // Fetch variations for this product
+            fetch(`actions.php?action=get_variations&id=${product.id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        data.forEach(v => {
+                            addVariationRow(v.weight, v.price, v.stock);
+                        });
+                    }
+                })
+                .catch(err => console.error("Error loading variations:", err));
+        }
+
+        // Variation Logic
+        function addVariationRow(weight = '', price = '', stock = '0') {
+            const container = document.getElementById('variationsContainer');
+            const rowId = 'var_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
+            
+            const div = document.createElement('div');
+            div.className = 'variation-row';
+            div.id = rowId;
+            div.style.display = 'flex';
+            div.style.gap = '10px';
+            div.style.marginBottom = '10px';
+            div.style.alignItems = 'flex-end';
+            
+            div.innerHTML = `
+                <div style="flex: 2;">
+                    <label style="font-size: 0.8rem;">Weight/Size</label>
+                    <input type="text" class="var-weight" value="${weight}" placeholder="e.g. 100g" style="width:100%; padding: 0.5rem;">
+                </div>
+                <div style="flex: 2;">
+                    <label style="font-size: 0.8rem;">Price (LKR)</label>
+                    <input type="number" class="var-price" step="0.01" value="${price}" placeholder="0.00" style="width:100%; padding: 0.5rem;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 0.8rem;">Stock</label>
+                    <input type="number" class="var-stock" value="${stock}" style="width:100%; padding: 0.5rem;">
+                </div>
+                <button type="button" onclick="removeVariationRow('${rowId}')" style="background:none; border:none; color: #e74c3c; cursor: pointer; font-size: 1.2rem; margin-bottom: 5px;">&times;</button>
+            `;
+            
+            container.appendChild(div);
+        }
+
+        function removeVariationRow(id) {
+            document.getElementById(id).remove();
+        }
+
+        function clearVariations() {
+            document.getElementById('variationsContainer').innerHTML = '';
+        }
+
+        function submitProductForm() {
+            // Collect variations
+            const rows = document.querySelectorAll('.variation-row');
+            const variations = [];
+            
+            rows.forEach(row => {
+                const weight = row.querySelector('.var-weight').value;
+                const price = row.querySelector('.var-price').value;
+                const stock = row.querySelector('.var-stock').value;
+                
+                if (weight && price) {
+                    variations.push({ weight, price, stock });
+                }
+            });
+            
+            document.getElementById('variationsJson').value = JSON.stringify(variations);
+            
+            // Submit form
+            document.querySelector('#productModal form').submit();
         }
 
         window.onclick = function (event) {

@@ -9,11 +9,13 @@ const Cart = {
 
     addItem: function (product) {
         let items = this.getItems();
-        const existingItem = items.find(item => item.id === product.id);
+        // Ensure strictly string comparison to obtain correct existing item
+        const existingItem = items.find(item => String(item.id) === String(product.id));
 
         if (existingItem) {
-            existingItem.quantity += parseInt(product.quantity);
+            existingItem.quantity = parseInt(existingItem.quantity) + parseInt(product.quantity);
         } else {
+            product.id = String(product.id); // Ensure stored ID is string
             items.push(product);
         }
 
@@ -26,7 +28,7 @@ const Cart = {
 
     updateItem: function (productId, quantity) {
         let items = this.getItems();
-        const item = items.find(item => item.id === productId);
+        const item = items.find(item => String(item.id) === String(productId));
         if (item) {
             item.quantity = parseInt(quantity);
             if (item.quantity <= 0) {
@@ -40,7 +42,7 @@ const Cart = {
 
     removeItem: function (productId) {
         let items = this.getItems();
-        items = items.filter(item => item.id !== productId);
+        items = items.filter(item => String(item.id) !== String(productId));
         localStorage.setItem(this.key, JSON.stringify(items));
         this.updateBadge();
     },

@@ -45,8 +45,8 @@ require_once 'config.php';
                         <span id="cart-subtotal">LKR 0.00</span>
                     </div>
                     <div class="summary-row">
-                        <span>Shipping</span>
-                        <span style="font-size: 0.9rem; color: #7f8c8d;">Calculated at checkout</span>
+                        <span><i class="fas fa-truck" style="color: #e67e22; margin-right: 5px;"></i> Shipping</span>
+                        <span style="font-weight: 600; color: #2c3e50;">LKR 350.00</span>
                     </div>
                     
                     <div class="summary-divider"></div>
@@ -412,9 +412,12 @@ document.addEventListener('DOMContentLoaded', () => {
             container.appendChild(div);
         });
         
-        const formattedTotal = 'LKR ' + subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        document.getElementById('cart-subtotal').innerText = formattedTotal;
-        document.getElementById('cart-total').innerText = formattedTotal;
+        const shippingCost = 350;
+        const subtotalFormatted = 'LKR ' + subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const totalFormatted = 'LKR ' + (subtotal + shippingCost).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
+        document.getElementById('cart-subtotal').innerText = subtotalFormatted;
+        document.getElementById('cart-total').innerText = totalFormatted;
     }
     
     // Make functions global for inline onclick

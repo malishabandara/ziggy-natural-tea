@@ -356,6 +356,7 @@ $slides = $stmt->fetchAll();
             <a href="dashboard.php">Products</a>
             <a href="orders.php">Orders</a>
             <a href="#" class="active">Slider Settings</a>
+            <a href="collections.php">Collections</a>
             <a href="messages">Messages</a>
             <a href="../index" target="_blank">View Site</a>
             <a href="actions.php?action=logout" class="logout">Logout</a>

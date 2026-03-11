@@ -5,6 +5,14 @@ require_once 'config.php';
 $stmt = $pdo->query("SELECT * FROM hero_slides ORDER BY order_index ASC");
 $heroSlides = $stmt->fetchAll();
 
+// Fetch collection cards
+try {
+    $cardsStmt = $pdo->query("SELECT * FROM collection_cards ORDER BY sort_order ASC");
+    $collectionCards = $cardsStmt->fetchAll();
+} catch (Exception $e) {
+    $collectionCards = [];
+}
+
 ?>
 <?php include 'includes/header.php'; ?>
 
@@ -67,57 +75,73 @@ $heroSlides = $stmt->fetchAll();
 <!-- Collections Highlight -->
 <section class="collections-section">
     <div class="section-header text-center">
-        <img src="assets/img/leaf-icon.svg" alt="" class="leaf-icon" style="width: 30px; margin-bottom: 10px;">
-        <!-- Placeholder icon -->
+        <!-- Placeholder icon removed -->
         <h2 class="serif">Our Collections</h2>
         <p class="section-desc">Handpicked from the lush hills of Sri Lanka</p>
     </div>
 
     <div class="collections-grid container">
-        <!-- Card 1 -->
-        <div class="collection-card">
-            <div class="collection-img">
-                <img src="assets/4.png" alt="Tea Collection">
-                <div class="card-overlay">
-                    <a href="products" class="btn-arrow">➔</a>
+        <?php if (!empty($collectionCards)): ?>
+            <?php foreach ($collectionCards as $card): ?>
+                <a href="<?php echo htmlspecialchars($card['link']); ?>" class="collection-card">
+                    <div class="collection-img">
+                        <img src="<?php echo htmlspecialchars($card['image_path']); ?>" alt="<?php echo htmlspecialchars($card['title']); ?>">
+                        <div class="card-overlay">
+                            <span class="btn-arrow">➔</span>
+                        </div>
+                    </div>
+                    <div class="collection-info">
+                        <h3><?php echo htmlspecialchars($card['title']); ?></h3>
+                        <p><?php echo htmlspecialchars($card['subtitle']); ?></p>
+                        <span class="link-gold">Shop Now</span>
+                    </div>
+                </a>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <!-- Fallback Static Cards if DB is empty -->
+            <!-- Fallback Static Cards if DB is empty -->
+            <a href="products" class="collection-card">
+                <div class="collection-img">
+                    <img src="assets/4.png" alt="Tea Collection">
+                    <div class="card-overlay">
+                        <span class="btn-arrow">➔</span>
+                    </div>
                 </div>
-            </div>
-            <div class="collection-info">
-                <h3>Premium Tea</h3>
-                <p>Pure Ceylon Black, Green & Herbal Teas</p>
-                <a href="products" class="link-gold">Shop Now</a>
-            </div>
-        </div>
+                <div class="collection-info">
+                    <h3>Premium Tea</h3>
+                    <p>Pure Ceylon Black, Green & Herbal Teas</p>
+                    <span class="link-gold">Shop Now</span>
+                </div>
+            </a>
 
-        <!-- Card 2 -->
-        <div class="collection-card">
-            <div class="collection-img">
-                <img src="assets/6.png" alt="Coffee Collection">
-                <div class="card-overlay">
-                    <a href="products" class="btn-arrow">➔</a>
+            <a href="products" class="collection-card">
+                <div class="collection-img">
+                    <img src="assets/6.png" alt="Coffee Collection">
+                    <div class="card-overlay">
+                        <span class="btn-arrow">➔</span>
+                    </div>
                 </div>
-            </div>
-            <div class="collection-info">
-                <h3>Artisan Coffee</h3>
-                <p>Rich Arabica & Robusta Blends</p>
-                <a href="products" class="link-gold">Shop Now</a>
-            </div>
-        </div>
+                <div class="collection-info">
+                    <h3>Artisan Coffee</h3>
+                    <p>Rich Arabica & Robusta Blends</p>
+                    <span class="link-gold">Shop Now</span>
+                </div>
+            </a>
 
-        <!-- Card 3 -->
-        <div class="collection-card">
-            <div class="collection-img">
-                <img src="assets/5.png" alt="Spices & Gifts">
-                <div class="card-overlay">
-                    <a href="products" class="btn-arrow">➔</a>
+            <a href="products" class="collection-card">
+                <div class="collection-img">
+                    <img src="assets/5.png" alt="Spices & Gifts">
+                    <div class="card-overlay">
+                        <span class="btn-arrow">➔</span>
+                    </div>
                 </div>
-            </div>
-            <div class="collection-info">
-                <h3>Gifts & Spices</h3>
-                <p>Curated Sets & Authentic Spices</p>
-                <a href="products" class="link-gold">Shop Now</a>
-            </div>
-        </div>
+                <div class="collection-info">
+                    <h3>Gifts & Spices</h3>
+                    <p>Curated Sets & Authentic Spices</p>
+                    <span class="link-gold">Shop Now</span>
+                </div>
+            </a>
+        <?php endif; ?>
     </div>
 </section>
 

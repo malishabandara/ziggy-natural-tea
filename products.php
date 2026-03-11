@@ -1,8 +1,16 @@
 <?php
 require_once 'config.php';
 // Show all products
-$stmt = $pdo->query("SELECT * FROM products ORDER BY created_at DESC");
-$products = $stmt->fetchAll();
+$stmt = $pdo->query("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY c.sort_order ASC, p.sort_order ASC, p.created_at DESC");
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch categories for tabs
+try {
+    $catStmt = $pdo->query("SELECT * FROM categories ORDER BY sort_order ASC, name ASC");
+    $categories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $categories = []; // Fallback
+}
 ?>
 <?php include 'includes/header.php'; ?>
 
@@ -14,21 +22,147 @@ $products = $stmt->fetchAll();
         </div>
     </section>
 
+    <style>
+        .product-card {
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none; /* Ensure link style doesn't mess up card */
+            color: inherit;
+            display: block; /* Make anchor behave like block */
+        }
+        
+        /* Ensure normal link behavior doesn't apply to text inside card */
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-img-wrapper .product-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            z-index: 1;
+            transition: opacity 0.6s ease-in-out, transform 0.5s ease;
+            object-fit: contain;
+            padding: 15px;
+            background-color: #fff;
+        }
+        .product-img-wrapper .product-img.active {
+            opacity: 1;
+            z-index: 2;
+        }
+        .product-img-wrapper:hover .product-img.active {
+            transform: scale(1.05);
+        }
+        .slide-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 8px 12px;
+            font-size: 18px;
+            z-index: 10;
+            border-radius: 4px;
+            display: none;
+            user-select: none;
+        }
+        .product-img-wrapper:hover .slide-arrow {
+            display: block;
+        }
+        .slide-arrow:hover {
+            background: rgba(0,0,0,0.6);
+        }
+        .prev-arrow { left: 10px; }
+        .next-arrow { right: 10px; }
+        
+        @media (max-width: 768px) {
+            .slide-arrow {
+                padding: 4px 8px;
+                font-size: 14px;
+                background: rgba(0,0,0,0.4); 
+            }
+            .prev-arrow { left: 5px; }
+            .next-arrow { right: 5px; }
+
+            /* Mobile Category Dropdown Styles */
+            .category-tabs { display: none !important; }
+            .mobile-category-container { display: block !important; }
+        }
+
+        .mobile-category-container {
+            display: none;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+
+        /* Mobile Category Grid Styles */
+        .mobile-category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two in a row */
+            gap: 0.5rem;
+        }
+
+        .mobile-cat-item {
+            padding: 0.6rem 0.4rem;
+            font-size: 10px; /* Very small text */
+            text-align: center;
+            background-color: #f4f6f7;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--primary-color);
+            transition: all 0.2s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid #eee;
+        }
+
+        .mobile-cat-item:active {
+            transform: scale(0.98);
+        }
+
+        .mobile-cat-item.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
     <section class="products-section">
         <div class="category-tabs">
             <button class="tab-btn active" data-tab="all">All</button>
-            <button class="tab-btn" data-tab="Ceylon Tea Collection">Ceylon Tea</button>
-            <button class="tab-btn" data-tab="Ceylon Coffee Collection">Ceylon Coffee</button>
-            <button class="tab-btn" data-tab="Gift Collection">Gift Collection</button>
+            <?php foreach ($categories as $cat): ?>
+                <button class="tab-btn" data-tab="<?php echo $cat['id']; ?>"><?php echo htmlspecialchars($cat['name']); ?></button>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="mobile-category-container">
+            <div class="mobile-category-grid">
+                <div class="mobile-cat-item active" data-tab="all">All Categories</div>
+                <?php foreach ($categories as $cat): ?>
+                    <div class="mobile-cat-item" data-tab="<?php echo $cat['id']; ?>"><?php echo htmlspecialchars($cat['name']); ?></div>
+                <?php endforeach; ?>
+            </div>
         </div>
         
         <div class="grid" id="products-grid">
             <?php if (count($products) > 0): ?>
                 <?php foreach ($products as $product): ?>
                     <?php 
-                        $category = $product['category'] ?? 'Ceylon Tea Collection'; 
+                        $catId = $product['category_id'] ?? '0'; 
                     ?>
-                    <div class="product-card" data-category="<?php echo htmlspecialchars($category); ?>" data-id="<?php echo $product['id']; ?>">
+                    <a href="product_details?id=<?php echo $product['id']; ?>" class="product-card" data-category="<?php echo $catId; ?>">
                         <div class="product-img-wrapper">
                             <?php 
                                 $stock = $product['stock'];
@@ -45,17 +179,38 @@ $products = $stmt->fetchAll();
                             ?>
                             <span class="stock-badge <?php echo $stockClass; ?>"><?php echo $stockText; ?></span>
                             <?php 
-                                $imgSrc = !empty($product['image']) ? $product['image'] : 'https://placehold.co/600x400/EEE/31343C?text=Ziggy+Product'; 
+                                $productImages = [];
+                                if (!empty($product['image'])) $productImages[] = $product['image'];
+                                if (isset($product['image2']) && !empty($product['image2'])) $productImages[] = $product['image2'];
+                                if (isset($product['image3']) && !empty($product['image3'])) $productImages[] = $product['image3'];
+                                
+                                if (empty($productImages)) {
+                                    $productImages[] = 'https://placehold.co/600x400/EEE/31343C?text=Ziggy+Product';
+                                }
                             ?>
-                            <img src="<?php echo htmlspecialchars($imgSrc); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="product-img">
+                            <?php foreach($productImages as $key => $img): ?>
+                                <img src="<?php echo htmlspecialchars($img); ?>" 
+                                     alt="<?php echo htmlspecialchars($product['name']); ?>" 
+                                     class="product-img <?php echo $key === 0 ? 'active' : ''; ?>"
+                                     >
+                            <?php endforeach; ?>
+                             <?php if (count($productImages) > 1): ?>
+                                <button class="slide-arrow prev-arrow" onclick="changeSlide(event, this, -1)">&#10094;</button>
+                                <button class="slide-arrow next-arrow" onclick="changeSlide(event, this, 1)">&#10095;</button>
+                                <div class="slider-dots" style="position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; z-index: 5;">
+                                    <?php foreach($productImages as $key => $img): ?>
+                                        <span class="dot" style="height: 6px; width: 6px; background-color: <?php echo $key === 0 ? '#fff' : 'rgba(255,255,255,0.5)'; ?>; border-radius: 50%; display: inline-block; margin: 0 3px; transition: background-color 0.3s;"></span>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         <div class="product-details">
                             <h3 class="product-name"><?php echo htmlspecialchars($product['name']); ?></h3>
-                            <p class="product-desc"><?php echo htmlspecialchars($product['description']); ?></p>
-                            <div class="product-price">LKR <?php echo number_format($product['price'], 2); ?></div>
-                            <button class="btn" style="margin-top: 1rem; width: 100%; font-size: 0.9rem;">Order</button>
+                            <!-- Description Removed per Request -->
+                            <!-- Price Removed per Request -->
+                            <span class="btn" style="display: block; text-align: center; margin-top: 1rem; width: 100%; font-size: 0.9rem;">View Details</span>
                         </div>
-                    </div>
+                    </a>
                 <?php endforeach; ?>
             <?php else: ?>
                 <p style="text-align:center; width:100%; grid-column: 1/-1; color: #777;">No products available.</p>
@@ -63,141 +218,83 @@ $products = $stmt->fetchAll();
         </div>
     </section>
 
-    <!-- Order Popup Modal -->
-    <div id="orderModal" class="modal-overlay">
-        <div class="product-modal">
-            <span class="close-btn">&times;</span>
-            <div class="modal-left">
-                <img id="modalImg" src="" alt="Product Image">
-            </div>
-            <div class="modal-right">
-                <h2 id="modalTitle">Product Name</h2>
-                <div class="price-tag" id="modalPrice">LKR 0.00</div>
-                <div class="unit-text">per unit</div>
-                
-                <div class="qty-section">
-                    <label>Quantity</label>
-                    <div class="qty-selector">
-                        <button class="qty-btn" id="decreaseQty">-</button>
-                        <input type="number" id="qtyInput" value="1" min="1" readonly>
-                        <button class="qty-btn" id="increaseQty">+</button>
-                    </div>
-                </div>
-                
-                <div class="total-section">
-                    <span>Total Amount:</span>
-                    <span id="modalTotal">LKR 0.00</span>
-                </div>
-                
-                <button id="addToCartBtn" class="confirm-btn">Add to Cart</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Tabs Logic
             const tabs = document.querySelectorAll('.tab-btn');
             const products = document.querySelectorAll('.product-card');
+            const mobileGridItems = document.querySelectorAll('.mobile-cat-item');
+
+            function filterProducts(category) {
+                products.forEach(product => {
+                    if (category === 'all' || product.getAttribute('data-category') === category) {
+                        product.style.display = ''; 
+                    } else {
+                        product.style.display = 'none';
+                    }
+                });
+            }
+
+            function setActiveState(category) {
+                // Update Desktop Tabs
+                tabs.forEach(t => {
+                    if (t.getAttribute('data-tab') === category) t.classList.add('active');
+                    else t.classList.remove('active');
+                });
+
+                // Update Mobile Grid Items
+                mobileGridItems.forEach(item => {
+                    if (item.getAttribute('data-tab') === category) item.classList.add('active');
+                    else item.classList.remove('active');
+                });
+            }
 
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
                     const category = tab.getAttribute('data-tab');
-                    products.forEach(product => {
-                        if (category === 'all' || product.getAttribute('data-category') === category) {
-                            product.style.display = ''; 
-                        } else {
-                            product.style.display = 'none';
-                        }
-                    });
+                    setActiveState(category);
+                    filterProducts(category);
                 });
             });
 
-            // Modal Logic
-            const modal = document.getElementById('orderModal');
-            const closeBtn = document.querySelector('.close-btn');
-            const modalImg = document.getElementById('modalImg');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalPrice = document.getElementById('modalPrice');
-            const modalTotal = document.getElementById('modalTotal');
-            const qtyInput = document.getElementById('qtyInput');
-            const increaseQty = document.getElementById('increaseQty');
-            const decreaseQty = document.getElementById('decreaseQty');
-            // Add to Cart Logic
-            const confirmBtn = document.getElementById('addToCartBtn');
-            let currentPrice = 0;
-
-            confirmBtn.addEventListener('click', () => {
-                const qty = parseInt(qtyInput.value);
-                const product = {
-                    id: modalTitle.getAttribute('data-id'), // ensure we pass ID
-                    name: modalTitle.innerText,
-                    price: currentPrice,
-                    image: modalImg.src,
-                    quantity: qty
-                };
-
-                Cart.addItem(product);
-                modal.style.display = 'none';
-            });
-
-            // Open Modal - Update to set ID
-            document.querySelectorAll('.btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    if(e.target.closest('.product-card')) {
-                        const card = e.target.closest('.product-card');
-                        const img = card.querySelector('.product-img').src;
-                        const title = card.querySelector('.product-name').innerText;
-                        const priceText = card.querySelector('.product-price').innerText.replace('LKR', '').trim().replace(',', '');
-                        // Assuming we can get ID from somewhere. Let's add data-id to product card in PHP loop first.
-                        const id = card.getAttribute('data-id'); 
-                        
-                        currentPrice = parseFloat(priceText);
-                        
-                        modalImg.src = img;
-                        modalTitle.innerText = title;
-                        modalTitle.setAttribute('data-id', id); // Store ID in modal
-                        modalPrice.innerText = 'LKR ' + currentPrice.toFixed(2);
-                        
-                        qtyInput.value = 1;
-                        updateTotal();
-                        
-                        modal.style.display = 'flex';
-                    }
+            // Mobile Grid Logic
+            mobileGridItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const category = item.getAttribute('data-tab');
+                    setActiveState(category);
+                    filterProducts(category);
                 });
             });
-
-
-            // Close Modal
-            closeBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-
-            window.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-
-            // Quantity Logic
-            increaseQty.addEventListener('click', () => {
-                qtyInput.value = parseInt(qtyInput.value) + 1;
-                updateTotal();
-            });
-
-            decreaseQty.addEventListener('click', () => {
-                if (parseInt(qtyInput.value) > 1) {
-                    qtyInput.value = parseInt(qtyInput.value) - 1;
-                    updateTotal();
-                }
-            });
-
-            function updateTotal() {
-                const total = currentPrice * parseInt(qtyInput.value);
-                modalTotal.innerText = 'LKR ' + total.toFixed(2);
-            }
         });
+
+        // Manual Slide Control
+        function changeSlide(event, btn, direction) {
+            event.preventDefault(); // Prevent navigating to product page
+            event.stopPropagation();
+            
+            const wrapper = btn.closest('.product-img-wrapper');
+            const images = wrapper.querySelectorAll('img.product-img');
+            const dots = wrapper.querySelectorAll('.dot');
+            
+            if (images.length <= 1) return;
+            
+            let currentIndex = 0;
+            images.forEach((img, index) => {
+                if(img.classList.contains('active')) currentIndex = index;
+            });
+            
+            // Remove current active
+            images[currentIndex].classList.remove('active');
+            if(dots[currentIndex]) dots[currentIndex].style.backgroundColor = 'rgba(255,255,255,0.5)';
+            
+            // Calculate new index
+            let newIndex = currentIndex + direction;
+            if (newIndex >= images.length) newIndex = 0;
+            if (newIndex < 0) newIndex = images.length - 1;
+            
+            // Set new active
+            images[newIndex].classList.add('active');
+            if(dots[newIndex]) dots[newIndex].style.backgroundColor = '#fff';
+        }
     </script>
 <?php include 'includes/footer.php'; ?>

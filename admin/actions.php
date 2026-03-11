@@ -52,46 +52,51 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 if ($action === 'add_product') {
     $name = $_POST['name'];
-    $category = $_POST['category']; // Add category
+    $categoryId = $_POST['category_id'];
     $price = $_POST['price'];
-    $stock = $_POST['stock'] ?? 0; // Add stock
+    $stock = $_POST['stock'] ?? 0;
+    $order = $_POST['sort_order'] ?? 0;
     $description = $_POST['description'];
 
 
     // Image Upload
-    $imagePath = '';
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-        // Use absolute path for reliability or relative to this script
-        $targetDir = __DIR__ . "/../assets/uploads/";
+    // Image Uploads
+    $imagePaths = ['image' => '', 'image2' => '', 'image3' => ''];
+    $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    $targetDir = __DIR__ . "/../assets/uploads/";
 
-        // Create directory if it doesn't exist
-        if (!file_exists($targetDir)) {
-            mkdir($targetDir, 0777, true);
-        }
+    if (!file_exists($targetDir)) {
+        mkdir($targetDir, 0777, true);
+    }
 
-        $fileName = time() . "_" . basename($_FILES["image"]["name"]);
-        $targetFile = $targetDir . $fileName;
+    foreach (['image', 'image2', 'image3'] as $imgKey) {
+        if (isset($_FILES[$imgKey]) && $_FILES[$imgKey]['error'] === 0) {
+            $fileName = time() . "_" . $imgKey . "_" . basename($_FILES[$imgKey]["name"]);
+            $targetFile = $targetDir . $fileName;
+            $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-        // Check file type
-        $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
-        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-        if (in_array($imageFileType, $allowedTypes)) {
-            if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
-                $imagePath = 'assets/uploads/' . $fileName;
+            if (in_array($imageFileType, $allowedTypes)) {
+                if (move_uploaded_file($_FILES[$imgKey]["tmp_name"], $targetFile)) {
+                    $imagePaths[$imgKey] = 'assets/uploads/' . $fileName;
+                }
             }
-        }
-    } else {
-        // Log error if upload failed but was attempted
-        if (isset($_FILES['image']) && $_FILES['image']['error'] !== 4) { // 4 is "no file uploaded"
-             $error = $_FILES['image']['error'];
-             header("Location: dashboard?msg=Image upload failed: Error code $error");
-             exit;
         }
     }
 
-    $stmt = $pdo->prepare("INSERT INTO products (name, category, price, stock, description, image) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$name, $category, $price, $stock, $description, $imagePath]);
+    $stmt = $pdo->prepare("INSERT INTO products (name, category_id, price, stock, sort_order, description, image, image2, image3) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$name, $categoryId, $price, $stock, $order, $description, $imagePaths['image'], $imagePaths['image2'], $imagePaths['image3']]);
+    $newProductId = $pdo->lastInsertId();
+
+    // Handle Variations
+    if (isset($_POST['variations_json']) && !empty($_POST['variations_json'])) {
+        $variations = json_decode($_POST['variations_json'], true);
+        if (json_last_error() === JSON_ERROR_NONE && !empty($variations)) {
+            $vStmt = $pdo->prepare("INSERT INTO product_variations (product_id, weight, price, stock) VALUES (?, ?, ?, ?)");
+            foreach ($variations as $v) {
+                $vStmt->execute([$newProductId, $v['weight'], $v['price'], $v['stock']]);
+            }
+        }
+    }
 
     header("Location: dashboard?msg=Product added");
     exit;
@@ -100,35 +105,56 @@ if ($action === 'add_product') {
 if ($action === 'update_product') {
     $id = $_POST['id'];
     $name = $_POST['name'];
-    $category = $_POST['category']; // Add category
+    $categoryId = $_POST['category_id'];
     $price = $_POST['price'];
     $stock = $_POST['stock'] ?? 0; // Add stock
+    $order = $_POST['sort_order'] ?? 0;
     $description = $_POST['description'];
 
-    $sql = "UPDATE products SET name = ?, category = ?, price = ?, stock = ?, description = ?";
-    $params = [$name, $category, $price, $stock, $description];
+    $sql = "UPDATE products SET name = ?, category_id = ?, price = ?, stock = ?, sort_order = ?, description = ?";
+    $params = [$name, $categoryId, $price, $stock, $order, $description];
 
 
     // Check if new image uploaded
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-        $targetDir = __DIR__ . "/../assets/uploads/";
+    // Image Uploads Update
+    $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    $targetDir = __DIR__ . "/../assets/uploads/";
 
-        // Create directory if it doesn't exist
-        if (!file_exists($targetDir)) {
-            mkdir($targetDir, 0777, true);
+    if (!file_exists($targetDir)) {
+        mkdir($targetDir, 0777, true);
+    }
+
+    foreach (['image', 'image2', 'image3'] as $imgKey) {
+        $shouldRemove = isset($_POST['remove_' . $imgKey]) && $_POST['remove_' . $imgKey] == '1';
+        $newFileUploaded = isset($_FILES[$imgKey]) && $_FILES[$imgKey]['error'] === 0;
+
+        if ($shouldRemove && !$newFileUploaded) {
+            // Fetch existing image to delete file
+            $stmt = $pdo->prepare("SELECT $imgKey FROM products WHERE id = ?");
+            $stmt->execute([$id]);
+            $currentImg = $stmt->fetchColumn();
+            
+            if ($currentImg && file_exists("../" . $currentImg)) {
+                 if (strpos($currentImg, 'assets/uploads/') !== false) {
+                    unlink("../" . $currentImg);
+                 }
+            }
+
+            $sql .= ", $imgKey = NULL";
         }
+        
+        if ($newFileUploaded) {
+            $fileName = time() . "_" . $imgKey . "_" . basename($_FILES[$imgKey]["name"]);
+            $targetFile = $targetDir . $fileName;
+            $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-        $fileName = time() . "_" . basename($_FILES["image"]["name"]);
-        $targetFile = $targetDir . $fileName;
-
-        // Check file type
-        $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
-        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-        if (in_array($imageFileType, $allowedTypes)) {
-            if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
-                $sql .= ", image = ?";
-                $params[] = 'assets/uploads/' . $fileName;
+            if (in_array($imageFileType, $allowedTypes)) {
+                // If replacing, maybe delete old one? Optional but good practice.
+                // For now, let's just upload new one.
+                if (move_uploaded_file($_FILES[$imgKey]["tmp_name"], $targetFile)) {
+                    $sql .= ", $imgKey = ?";
+                    $params[] = 'assets/uploads/' . $fileName;
+                }
             }
         }
     }
@@ -138,6 +164,21 @@ if ($action === 'update_product') {
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
+
+    // Handle Variations (Easy way: Delete all for this product and re-insert)
+    if (isset($_POST['variations_json'])) {
+        // First delete existing
+        $pdo->prepare("DELETE FROM product_variations WHERE product_id = ?")->execute([$id]);
+        
+        $variations = json_decode($_POST['variations_json'], true);
+        if (json_last_error() === JSON_ERROR_NONE && !empty($variations)) {
+            $vStmt = $pdo->prepare("INSERT INTO product_variations (product_id, weight, price, stock) VALUES (?, ?, ?, ?)");
+            foreach ($variations as $v) {
+                $vStmt->execute([$id, $v['weight'], $v['price'], $v['stock']]);
+            }
+        }
+    }
+
     header("Location: dashboard?msg=Product updated");
     exit;
 }
@@ -291,5 +332,71 @@ if ($action === 'update_order_status') {
     
     header("Location: orders.php?msg=Order updated to " . ucfirst($status));
     exit;
+}if ($action === 'get_variations') {
+    $id = $_GET['id'] ?? 0;
+    if ($id) {
+        $stmt = $pdo->prepare("SELECT * FROM product_variations WHERE product_id = ?");
+        $stmt->execute([$id]);
+        $rows = $stmt->fetchAll();
+        echo json_encode($rows);
+    } else {
+        echo json_encode([]);
+    }
+    exit;
 }
+// Category Management
+if ($action === 'add_category') {
+    $name = trim($_POST['name'] ?? '');
+    $order = $_POST['sort_order'] ?? 0;
+    
+    if (!empty($name)) {
+        // Check duplicate
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM categories WHERE name = ?");
+        $stmt->execute([$name]);
+        if ($stmt->fetchColumn() > 0) {
+            header("Location: categories.php?msg=Category already exists");
+            exit;
+        }
+
+        $stmt = $pdo->prepare("INSERT INTO categories (name, sort_order) VALUES (?, ?)");
+        $stmt->execute([$name, $order]);
+        header("Location: categories.php?msg=Category added successfully");
+    } else {
+        header("Location: categories.php?msg=Category name is required");
+    }
+    exit;
+}
+
+if ($action === 'update_category') {
+    $id = $_POST['id'];
+    $name = trim($_POST['name'] ?? '');
+    $order = $_POST['sort_order'] ?? 0;
+
+    if (!empty($name)) {
+        // Check duplicate excluding self
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM categories WHERE name = ? AND id != ?");
+        $stmt->execute([$name, $id]);
+        if ($stmt->fetchColumn() > 0) {
+            header("Location: categories.php?error=Category name already exists");
+            exit;
+        }
+
+        $stmt = $pdo->prepare("UPDATE categories SET name = ?, sort_order = ? WHERE id = ?");
+        $stmt->execute([$name, $order, $id]);
+        header("Location: categories.php?msg=Category updated successfully");
+    }
+    exit;
+}
+
+if ($action === 'delete_category') {
+    $id = $_GET['id'] ?? 0;
+    
+    if ($id) {
+        $stmt = $pdo->prepare("DELETE FROM categories WHERE id = ?");
+        $stmt->execute([$id]);
+        header("Location: categories.php?msg=Category deleted");
+    }
+    exit;
+}
+
 ?>
