@@ -21,7 +21,8 @@ try {
     <div class="hero-slider">
         <?php if (!empty($heroSlides)): ?>
             <?php foreach ($heroSlides as $index => $slide): ?>
-                <div class="hero-slide <?php echo $index === 0 ? 'active' : ''; ?>" style="background-image: url('<?php echo htmlspecialchars($slide['image_path']); ?>');">
+                <div class="hero-slide <?php echo $index === 0 ? 'active' : ''; ?>">
+                    <div class="hero-bg" style="background-image: url('<?php echo htmlspecialchars($slide['image_path']); ?>');"></div>
                     <div class="hero-overlay"></div>
                     <div class="hero-content">
                         <?php if ($slide['subtitle']): ?>
@@ -39,7 +40,8 @@ try {
             <?php endforeach; ?>
         <?php else: ?>
             <!-- Slide 1 -->
-            <div class="hero-slide active" style="background-image: url('assets/customers/1.JPG');">
+            <div class="hero-slide active">
+                <div class="hero-bg" style="background-image: url('assets/customers/1.JPG');"></div>
                 <div class="hero-overlay"></div>
                 <div class="hero-content">
                     <span class="hero-subtitle">Premium Ceylon Collection</span>
@@ -49,7 +51,8 @@ try {
                 </div>
             </div>
             <!-- Slide 2 -->
-            <div class="hero-slide" style="background-image: url('assets/1.PNG');">
+            <div class="hero-slide">
+                <div class="hero-bg" style="background-image: url('assets/1.PNG');"></div>
                 <div class="hero-overlay"></div>
                 <div class="hero-content">
                     <span class="hero-subtitle">Artisan Roasted Coffee</span>
@@ -59,7 +62,8 @@ try {
                 </div>
             </div>
             <!-- Slide 3 -->
-            <div class="hero-slide" style="background-image: url('assets/3.JPG');">
+            <div class="hero-slide">
+                <div class="hero-bg" style="background-image: url('assets/3.JPG');"></div>
                 <div class="hero-overlay"></div>
                 <div class="hero-content">
                     <span class="hero-subtitle">Wellness & Harmony</span>
@@ -74,13 +78,13 @@ try {
 
 <!-- Collections Highlight -->
 <section class="collections-section">
-    <div class="section-header text-center">
+    <div class="section-header text-center reveal">
         <!-- Placeholder icon removed -->
         <h2 class="serif">Our Collections</h2>
         <p class="section-desc">Handpicked from the lush hills of Sri Lanka</p>
     </div>
 
-    <div class="collections-grid container">
+    <div class="collections-grid container reveal">
         <?php if (!empty($collectionCards)): ?>
             <?php foreach ($collectionCards as $card): ?>
                 <a href="<?php echo htmlspecialchars($card['link']); ?>" class="collection-card">
@@ -147,7 +151,7 @@ try {
 
 <!-- Stats Section -->
 <section class="stats-section">
-    <div class="container stats-grid">
+    <div class="container stats-grid reveal">
         <div class="stat-item">
             <h2 class="serif counter" data-target="70" data-suffix="+">0</h2>
             <p>Premium Varieties</p>
@@ -168,7 +172,7 @@ try {
 </section>
 
 <!-- Certifications -->
-<section class="certifications-section">
+<section class="certifications-section reveal">
     <div class="container">
         <p class="text-center mb-4 uppercase-track">We take pride in our quality certifications</p>
         <div class="cert-grid">
@@ -180,31 +184,97 @@ try {
     </div>
 </section>
 
-<!-- Features / Why Choose Us -->
-<section class="features-section bg-cream">
+<!-- Premium Features Section -->
+<section class="premium-features-narrative">
     <div class="container">
-        <div class="features-grid">
-            <div class="feature-item">
-                <div class="icon-box">🌿</div>
-                <h3>100% Natural</h3>
-                <p>Sourced directly from certified organic plantations without artificial additives.</p>
+        <!-- Feature Block 1 (Image Right) -->
+        <div class="feature-narrative-block reverse reveal-right">
+            <div class="feature-narrative-image">
+                <img src="assets/uploads/01.png" alt="100% Natural" class="main-feature-img">
+                <img src="assets/11.png" alt="Pure Decor" class="corner-decor decor-tr">
+                <img src="assets/12.png" alt="Pure Decor" class="corner-decor decor-bl">
             </div>
-            <div class="feature-item">
-                <div class="icon-box">✨</div>
-                <h3>Premium Quality</h3>
-                <p>Hand-picked leaves and beans ensuring the finest aroma and taste.</p>
+            <div class="feature-narrative-content">
+                <span class="feature-tag">PURE SOURCE</span>
+                <h3 class="serif">100% Natural</h3>
+                <p>
+                    Experience nature in its purest form. Our tea leaves and coffee beans are sourced directly from 
+                    certified organic plantations, ensuring no artificial additives.
+                </p>
+                <div class="extra-text">
+                    <p>
+                        Every sip is a tribute to the earth's natural bounty, preserved with the utmost care from soil to cup.
+                    </p>
+                </div>
+                <button class="read-more-btn" onclick="toggleText(this)">Read More</button>
             </div>
-            <div class="feature-item">
-                <div class="icon-box">🌍</div>
-                <h3>Eco-Friendly</h3>
-                <p>Sustainable farming and biodegradable packaging for a better planet.</p>
+        </div>
+
+        <!-- Feature Block 2 (Image Left) -->
+        <div class="feature-narrative-block reveal-left">
+            <div class="feature-narrative-image">
+                <img src="assets/uploads/02.png" alt="Premium Quality" class="main-feature-img">
+                <img src="assets/11.png" alt="Quality Decor" class="corner-decor decor-tr">
+                <img src="assets/12.png" alt="Quality Decor" class="corner-decor decor-bl">
+            </div>
+            <div class="feature-narrative-content">
+                <span class="feature-tag">EXCELLENCE</span>
+                <h3 class="serif">Premium Quality</h3>
+                <p>
+                    Quality is not just a standard; it's our promise. We hand-pick only the finest, most tender leaves 
+                    and premium beans.
+                </p>
+                <div class="extra-text">
+                    <p>
+                        Our artisans use time-honored techniques combined with modern precision to craft the perfect blend for your ritual.
+                    </p>
+                </div>
+                <button class="read-more-btn" onclick="toggleText(this)">Read More</button>
+            </div>
+        </div>
+
+        <!-- Feature Block 3 (Image Right) -->
+        <div class="feature-narrative-block reverse reveal-right">
+            <div class="feature-narrative-image">
+                <img src="assets/uploads/03.png" alt="Eco-Friendly" class="main-feature-img">
+                <img src="assets/11.png" alt="Eco Decor" class="corner-decor decor-tr">
+                <img src="assets/12.png" alt="Eco Decor" class="corner-decor decor-bl">
+            </div>
+            <div class="feature-narrative-content">
+                <span class="feature-tag">SUSTAINABILITY</span>
+                <h3 class="serif">Eco-Friendly</h3>
+                <p>
+                    Our commitment to nature goes beyond organic farming. We utilize sustainable practices and 
+                    biodegradable packaging.
+                </p>
+                <div class="extra-text">
+                    <p>
+                        By choosing Ziggy Natural, you're not just choosing a premium brew; you're supporting a greener, 
+                        more sustainable future for generations to come.
+                    </p>
+                </div>
+                <button class="read-more-btn" onclick="toggleText(this)">Read More</button>
             </div>
         </div>
     </div>
 </section>
 
+<script>
+function toggleText(btn) {
+    const parent = btn.parentElement;
+    const extraText = parent.querySelector('.extra-text');
+    if (extraText.style.display === 'block') {
+        extraText.style.display = 'none';
+        btn.textContent = 'Read More';
+    } else {
+        extraText.style.display = 'block';
+        btn.textContent = 'Read Less';
+    }
+}
+</script>
+
 <!-- Team / Story Section -->
-<section class="story-section">
+<section class="story-section reveal">
     <div class="container">
         <div class="story-content text-center">
             <h2 class="serif">The Heart Behind the Brew</h2>
@@ -214,7 +284,7 @@ try {
                 you the authentic taste of nature.
             </p>
             <div class="team-img-wrapper">
-                <img src="assets/7.png" alt="Our Team" class="team-img">
+                <img src="assets/7.jpeg" alt="Our Team" class="team-img">
             </div>
             <a href="about" class="btn btn-dark mt-4">Read Our Story</a>
         </div>
@@ -222,7 +292,7 @@ try {
 </section>
 
 <!-- Bottom CTA -->
-<section class="cta-section" style="background-image: url('assets/customers/bbb.jpg');">
+<section class="cta-section reveal" style="background-image: url('assets/customers/bbb.jpg');">
     <div class="cta-overlay"></div>
     <div class="container relative z-10 text-center text-white">
         <h2 class="serif mb-2">Elevate Your Daily Ritual</h2>

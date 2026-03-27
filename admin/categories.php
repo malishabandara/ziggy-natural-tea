@@ -223,12 +223,12 @@ try {
         <div class="nav-links" id="navLinks">
             <a href="dashboard.php">Products</a>
             <a href="#" class="active">Categories</a>
-            <a href="orders.php">Orders</a>
+            <a href="inquiries.php">Product Inquiries</a>
             <a href="slider.php">Slider Settings</a>
             <a href="collections.php">Collections</a>
             <a href="messages">Messages</a>
             <a href="../index" target="_blank">View Site</a>
-            <a href="actions.php?action=logout" style="color: var(--danger); margin-top: 2rem;">Logout</a>
+            <a href="actions.php?action=logout" class="logout">Logout</a>
         </div>
     </div>
 

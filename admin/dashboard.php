@@ -330,7 +330,7 @@ foreach ($allProducts as $product) {
         <div class="nav-links" id="navLinks">
             <a href="#" class="active">Products</a>
             <a href="categories.php">Categories</a>
-            <a href="orders.php">Orders</a>
+            <a href="inquiries.php">Product Inquiries</a>
             <a href="slider.php">Slider Settings</a>
             <a href="collections.php">Collections</a>
             <a href="messages">Messages</a>

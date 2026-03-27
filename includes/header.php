@@ -1,5 +1,7 @@
 <?php
 $current_page = basename($_SERVER['PHP_SELF']);
+$hero_pages = ['index.php', '', 'index', 'about.php', 'about', 'products.php', 'products', 'contact.php', 'contact'];
+$has_hero = in_array($current_page, $hero_pages);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,22 +13,26 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link rel="icon" type="image/png" href="assets/logo.png">
     <link rel="shortcut icon" href="assets/logo.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/logo.png">
-    <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time() . rand(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time() . rand(); ?>">
 </head>
 
-<body>
+<body class="<?php echo $has_hero ? 'home-page' : ''; ?>">
 
-    <header>
+    <header class="<?php echo $has_hero ? 'header-transparent' : ''; ?>">
         <a href="index" class="logo">
             <img src="assets/logo.png" alt="Ziggy Natural" style="height: 50px; margin-right: 10px;">
             <div class="logo-text">Ziggy <span>Natural</span></div>
         </a>
-        <nav>
+        <nav id="nav-menu">
             <a href="index" class="<?php echo $current_page == 'index.php' ? 'active' : ''; ?>">Home</a>
             <a href="products" class="<?php echo $current_page == 'products.php' ? 'active' : ''; ?>">Shop</a>
             <a href="about" class="<?php echo $current_page == 'about.php' ? 'active' : ''; ?>">About</a>
             <a href="contact" class="<?php echo $current_page == 'contact.php' ? 'active' : ''; ?>">Contact</a>
         </nav>
+        <div class="menu-toggle" id="mobile-menu">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
     </header>

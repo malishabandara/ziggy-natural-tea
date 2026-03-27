@@ -332,7 +332,35 @@ if ($action === 'update_order_status') {
     
     header("Location: orders.php?msg=Order updated to " . ucfirst($status));
     exit;
-}if ($action === 'get_variations') {
+}
+
+if ($action === 'get_inquiry_details') {
+    $id = $_GET['id'];
+    
+    $stmt = $pdo->prepare("SELECT i.*, p.name as product_name FROM product_inquiries i LEFT JOIN products p ON i.product_id = p.id WHERE i.id = ?");
+    $stmt->execute([$id]);
+    $inquiry = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$inquiry) {
+        echo json_encode(['error' => 'Inquiry not found']);
+        exit;
+    }
+    
+    echo json_encode([
+        'inquiry' => $inquiry
+    ]);
+    exit;
+}
+
+if ($action === 'delete_inquiry') {
+    $id = $_GET['id'];
+    $stmt = $pdo->prepare("DELETE FROM product_inquiries WHERE id = ?");
+    $stmt->execute([$id]);
+    header("Location: inquiries.php?msg=Inquiry deleted");
+    exit;
+}
+
+if ($action === 'get_variations') {
     $id = $_GET['id'] ?? 0;
     if ($id) {
         $stmt = $pdo->prepare("SELECT * FROM product_variations WHERE product_id = ?");

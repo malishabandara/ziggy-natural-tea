@@ -121,7 +121,7 @@ $cards = $pdo->query("SELECT * FROM collection_cards ORDER BY sort_order ASC")->
         <h2>Ziggy Admin</h2>
         <a href="dashboard.php">Products</a>
         <a href="categories.php">Categories</a>
-        <a href="orders.php">Orders</a>
+        <a href="inquiries.php">Product Inquiries</a>
         <a href="slider.php">Slider Settings</a>
         <a href="collections.php" class="active">Collections</a>
         <a href="messages">Messages</a>
