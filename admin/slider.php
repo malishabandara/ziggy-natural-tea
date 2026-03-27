@@ -347,21 +347,7 @@ $slides = $stmt->fetchAll();
 
 <body>
 
-    <div class="sidebar" id="sidebar">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <h2>Ziggy Admin</h2>
-            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-        </div>
-        <div class="nav-links" id="navLinks">
-            <a href="dashboard.php">Products</a>
-            <a href="inquiries.php">Product Inquiries</a>
-            <a href="#" class="active">Slider Settings</a>
-            <a href="collections.php">Collections</a>
-            <a href="messages">Messages</a>
-            <a href="../index" target="_blank">View Site</a>
-            <a href="actions.php?action=logout" class="logout">Logout</a>
-        </div>
-    </div>
+    <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
         <div class="header">
@@ -473,10 +459,7 @@ $slides = $stmt->fetchAll();
     </div>
 
     <script>
-        function toggleSidebar() {
-            const navLinks = document.getElementById('navLinks');
-            navLinks.classList.toggle('active');
-        }
+
 
         const modal = document.getElementById('slideModal');
         const modalTitle = document.getElementById('modalTitle');

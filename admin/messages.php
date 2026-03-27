@@ -7,8 +7,22 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
-// Fetch all messages
-$stmt = $pdo->query("SELECT * FROM contact_messages ORDER BY created_at DESC");
+// Pagination settings
+$limit = 15;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $limit;
+
+// Get total count for pagination
+$countStmt = $pdo->query("SELECT COUNT(*) FROM contact_messages");
+$totalMessages = $countStmt->fetchColumn();
+$totalPages = ceil($totalMessages / $limit);
+
+// Fetch messages with LIMIT
+$stmt = $pdo->prepare("SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT :limit OFFSET :offset");
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $messages = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -212,27 +226,49 @@ $messages = $stmt->fetchAll();
                 width: 100%;
             }
         }
+
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+            gap: 0.5rem;
+        }
+
+        .pagination-link {
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: var(--primary);
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .pagination-link:hover {
+            background: #f8f9fa;
+            border-color: var(--primary);
+        }
+
+        .pagination-link.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination-info {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-align: right;
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="sidebar" id="sidebar">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <h2>Ziggy Admin</h2>
-            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-        </div>
-        <div class="nav-links" id="navLinks">
-            <a href="dashboard">Products</a>
-            <a href="categories.php">Categories</a>
-            <a href="inquiries.php">Product Inquiries</a>
-            <a href="slider.php">Slider Settings</a>
-            <a href="collections.php">Collections</a>
-            <a href="messages" class="active">Messages</a>
-            <a href="../index" target="_blank">View Site</a>
-            <a href="actions.php?action=logout" class="logout">Logout</a>
-        </div>
-    </div>
+    <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
         <div class="header">
@@ -277,13 +313,32 @@ $messages = $stmt->fetchAll();
                 </tbody>
             </table>
         </div>
+
+        <?php if ($totalPages > 1): ?>
+        <div class="pagination">
+            <?php if ($page > 1): ?>
+                <a href="?page=<?php echo $page - 1; ?>" class="pagination-link">&laquo; Prev</a>
+            <?php endif; ?>
+
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <a href="?page=<?php echo $i; ?>" class="pagination-link <?php echo $i === $page ? 'active' : ''; ?>">
+                    <?php echo $i; ?>
+                </a>
+            <?php endfor; ?>
+
+            <?php if ($page < $totalPages): ?>
+                <a href="?page=<?php echo $page + 1; ?>" class="pagination-link">Next &raquo;</a>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+        
+        <div class="pagination-info" style="margin-top: 1rem;">
+            Showing <?php echo min($totalMessages, $offset + 1); ?> - <?php echo min($totalMessages, $offset + $limit); ?> of <?php echo (int)$totalMessages; ?> messages
+        </div>
     </div>
 
     <script>
-        function toggleSidebar() {
-            const navLinks = document.getElementById('navLinks');
-            navLinks.classList.toggle('active');
-        }
+
     </script>
 
 </body>

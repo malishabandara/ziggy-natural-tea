@@ -61,9 +61,9 @@ header {
     justify-content: space-between;
     align-items: center;
     z-index: 10000;
-    background-color: rgba(253, 251, 247, 0.98); /* Default solid for subpages */
+    background-color: #ffffff; /* Use pure white for better visibility on subpages */
     backdrop-filter: blur(10px);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* More prominent shadow */
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 

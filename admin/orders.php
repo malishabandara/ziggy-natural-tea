@@ -242,21 +242,7 @@ $orders = $stmt->fetchAll();
 
 <body>
 
-    <div class="sidebar">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <h2>Ziggy Admin</h2>
-            <button class="menu-toggle" onclick="document.getElementById('navLinks').classList.toggle('active')">☰</button>
-        </div>
-        <div class="nav-links" id="navLinks">
-            <a href="dashboard">Products</a>
-            <a href="orders.php" class="active">Orders</a>
-            <a href="slider.php">Slider Settings</a>
-            <a href="collections.php">Collections</a>
-            <a href="messages">Messages</a>
-            <a href="../index" target="_blank">View Site</a>
-            <a href="actions.php?action=logout" class="logout">Logout</a>
-        </div>
-    </div>
+    <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
         <div class="header">

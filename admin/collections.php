@@ -111,23 +111,31 @@ $cards = $pdo->query("SELECT * FROM collection_cards ORDER BY sort_order ASC")->
         .form-group input { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
         
         @media (max-width: 768px) {
-            .sidebar { display: none; } /* Simplified mobile for brevity, dashboard has toggle logic */
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; box-sizing: border-box; }
+            .sidebar h2 { margin-bottom: 0; font-size: 1.2rem; border-bottom: none; padding-bottom: 0; }
+            .menu-toggle { display: block; background:none; border:none; color:white; font-size:1.5rem; cursor: pointer; }
+            .nav-links { display: none; flex-direction: column; width: 100%; margin-top: 1rem; }
+            .nav-links.active { display: flex; }
             .main-content { padding: 1rem; }
+        }
+
+        /* Desktop styles for new structure */
+        @media (min-width: 769px) {
+            .menu-toggle {
+                display: none;
+            }
+
+            .nav-links {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>Ziggy Admin</h2>
-        <a href="dashboard.php">Products</a>
-        <a href="categories.php">Categories</a>
-        <a href="inquiries.php">Product Inquiries</a>
-        <a href="slider.php">Slider Settings</a>
-        <a href="collections.php" class="active">Collections</a>
-        <a href="messages">Messages</a>
-        <a href="../index" target="_blank">View Site</a>
-        <a href="actions.php?action=logout" class="logout">Logout</a>
-    </div>
+    <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
         <div class="header">

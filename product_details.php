@@ -20,9 +20,12 @@ $variations = $vStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Prepare images
 $images = [];
-if (!empty($product['image'])) $images[] = $product['image'];
-if (!empty($product['image2'])) $images[] = $product['image2'];
-if (!empty($product['image3'])) $images[] = $product['image3'];
+if (!empty($product['image']))
+    $images[] = $product['image'];
+if (!empty($product['image2']))
+    $images[] = $product['image2'];
+if (!empty($product['image3']))
+    $images[] = $product['image3'];
 
 // Fallback image
 if (empty($images)) {
@@ -33,8 +36,8 @@ $pageTitle = $product['name'];
 include 'includes/header.php';
 ?>
 
-<!-- Minimal Header Offset -->
-<div style="margin-top: 100px;"></div>
+<!-- Content Offset for Fixed Header -->
+<div class="header-spacer" style="height: 20px;"></div>
 
 <!-- Breadcrumb -->
 <div class="container mb-4">
@@ -61,13 +64,14 @@ include 'includes/header.php';
             <div class="inquiry-left">
                 <div class="inquiry-product-image mb-4">
                     <div class="pdp-slider-container">
-                        <?php foreach($images as $index => $imgUrl): ?>
+                        <?php foreach ($images as $index => $imgUrl): ?>
                         <div class="pdp-slide <?php echo $index === 0 ? 'active' : ''; ?>">
                             <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="Product View" class="floating-img">
                         </div>
-                        <?php endforeach; ?>
+                        <?php
+endforeach; ?>
                         
-                        <?php if(count($images) > 1): ?>
+                        <?php if (count($images) > 1): ?>
                         <button class="pdp-nav prev" onclick="changePDPSlide(-1)">
                             <i class="fas fa-chevron-left"></i>
                         </button>
@@ -75,11 +79,13 @@ include 'includes/header.php';
                             <i class="fas fa-chevron-right"></i>
                         </button>
                         <div class="pdp-dots">
-                            <?php foreach($images as $index => $imgUrl): ?>
+                            <?php foreach ($images as $index => $imgUrl): ?>
                             <span class="dot <?php echo $index === 0 ? 'active' : ''; ?>" onclick="currentPDPSlide(<?php echo $index; ?>)"></span>
-                            <?php endforeach; ?>
+                            <?php
+    endforeach; ?>
                         </div>
-                        <?php endif; ?>
+                        <?php
+endif; ?>
                     </div>
                 </div>
                 <div class="brand-info">
@@ -198,9 +204,9 @@ include 'includes/header.php';
 
 <!-- Related Products -->
 <?php
-    $relatedStmt = $pdo->query("SELECT * FROM products WHERE id != $id ORDER BY RAND() LIMIT 4");
-    $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
-    if($relatedProducts):
+$relatedStmt = $pdo->query("SELECT * FROM products WHERE id != $id ORDER BY RAND() LIMIT 4");
+$relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
+if ($relatedProducts):
 ?>
 <section class="related-products-section bg-cream">
     <div class="container">
@@ -218,11 +224,13 @@ include 'includes/header.php';
                         </div>
                     </div>
                 </a>
-             <?php endforeach; ?>
+             <?php
+    endforeach; ?>
         </div>
     </div>
 </section>
-<?php endif; ?>
+<?php
+endif; ?>
 
 
 <script>
@@ -762,7 +770,7 @@ include 'includes/header.php';
 }
 /* Related Products Redesign */
 .related-products-section {
-    background-color: #fbfbfb;
+    background-color: #fff;
     padding: 80px 0;
 }
 
@@ -777,7 +785,7 @@ include 'includes/header.php';
 }
 
 .related-product-card {
-    background: #fff;
+    background: #ffffff;
     border-radius: 12px;
     padding: 15px;
     text-align: center;
@@ -798,7 +806,7 @@ include 'includes/header.php';
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f9f9f9;
+    background: #ffffff;
     border-radius: 8px;
     overflow: hidden;
 }
